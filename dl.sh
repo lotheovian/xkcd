@@ -62,9 +62,8 @@ then
       printf "<br><p>Link to comic %s</p>" ${COMIC} >> $TMP
       printf "<img src=\"%s\">" ${COMIC} >> $TMP
    done
-else # Or pick 5 random comics
-   RAND_COMICS="$(jot -r 5 1 $CURRENT_COMIC)"
-   for RAND_COMIC in $RAND_COMICS
+else # Or pick 5 random comics   
+   for RAND_COMIC in $(shut -i 1-${CURRENT_COMIC} -n 5)
    do
       isExcluded ${RAND_COMIC} && continue
       RAND_COMIC_URL=$(curl https://xkcd.com/${RAND_COMIC}/ 2> /dev/null | grep "Image URL (for hotlinking/embedding):" | sed "s/.*embedding):\(.*\)/\1/")

@@ -36,7 +36,7 @@ COMIC_URLS_FETCHED=""
 COMICS_FETCHED=0
 
 XKCD_DIR="$(echo ~/Documents/xkcd/)"
-XKCD_CONFIG="~/Docuemnts/xkcd_config"
+XKCD_CONFIG="$(echo ~/Documents/xkcd_config)"
 if [ ! -f $XKCD_CONFIG ]
 then echo please make a config file with a FROM_EMAIL and MAILING_LIST in the file $XKCD_CONFIG
      exit 1
@@ -69,13 +69,14 @@ done
 TMP="$(mktemp /tmp/XXXXX)"
 makeMailHeader > ${TMP}
 
-if [ -n "${COMICS_FETCHED}" ] # Send out the latest stuff
+if [ "${COMICS_FETCHED}" != 0 ] # Send out the latest stuff
 then for COMIC in ${COMIC_URLS_FETCHED}
-     do printf "<br><p>Link to comic %s</p>" ${COMIC} >> $TMP
+     do printf "<br>Click <a href=\"%s\">here</a> for the comic.\n" "${COMIC}" >> $TMP
+        printf "<br>Click <a href=\"%s\">here</a> for the explanation.\n" "https://www.explainxkcd.com/wiki/index.php/${COMIC##*/}" >> $TMP
         printf "<img src=\"%s\">" ${COMIC} >> $TMP
      done
 else # Or pick 5 random comics   
-     for RAND_COMIC in $(shut -i 1-${CURRENT_COMIC} -n 5)
+     for RAND_COMIC in $(jot -r 5 1 $CURRENT_COMIC)
      do isExcluded ${RAND_COMIC} && continue
         RAND_COMIC_URL=$(curl https://xkcd.com/${RAND_COMIC}/ 2> /dev/null | grep "Image URL (for hotlinking/embedding):" | sed "s/.*embedding):\(.*\)/\1/")
         printf "<br>Click <a href=\"%s\">here</a> for the comic.\n" "https://xkcd.com/${RAND_COMIC}/" >> $TMP
